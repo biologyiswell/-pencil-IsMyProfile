@@ -52,6 +52,7 @@ public class IsMyProfiler extends JavaPlugin
     public void onEnable()
     {
         instance = this;
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
     }
 
     /**

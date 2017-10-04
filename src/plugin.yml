@@ -1,0 +1,6 @@
+name: IsMyProfiler
+main: com.github.biologyiswell.profiler.IsMyProfiler
+version: 0.1
+author: biologyiswell
+
+description: IsMyProfiler is a plugin that change the names and skins from players

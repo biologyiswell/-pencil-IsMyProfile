@@ -181,7 +181,7 @@ public class ProfileManager
      * Get Property,
      * This method get the property from player
      *
-     * @param fromWhom this represents the properties
+     * @param fromWhom this represents the player name that will get the properties
      */
     private static JsonObject getProperty(final String fromWhom)
     {
@@ -213,7 +213,7 @@ public class ProfileManager
             final EntityHuman entityHuman = ((CraftPlayer) player).getHandle();
 
             // ## TRING TO REFLECTION
-            // ## NEED BE REMOVE THE FINAL FROM GAME PROFILE FIELD (ENTITY HUMAN)
+            // ## NEED BE REMOVE THE FINAL MODIFIER FROM GAME PROFILE FIELD (ENTITY HUMAN)
             try
             {
                 final Field gameProfileField = entityHuman.getClass().getDeclaredField("bH");
