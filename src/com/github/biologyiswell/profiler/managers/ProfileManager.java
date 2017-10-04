@@ -101,26 +101,45 @@ public class ProfileManager
             throw new RuntimeException("Can't be change the name from the player " + player.getName() + ".");
         }
 
-        // ## MAKE THE PACKETS
-        // ## (TO MAKE MORE FAST THE UPDATE)
+        updatePlayer(ep); // ## UPDATE PLAYER
+    }
 
-        final PacketPlayOutPlayerInfo prem = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ep);
-        final PacketPlayOutPlayerInfo padd = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ep);
-        final PacketPlayOutEntityDestroy pdes = new PacketPlayOutEntityDestroy(ep.getId());
-        final PacketPlayOutNamedEntitySpawn pnes = new PacketPlayOutNamedEntitySpawn(ep);
+    /**
+     * Set Name,
+     * This method change the name from player
+     *
+     * @param player the player that the name will be change
+     * @param name the name
+     */
+    public static void setName(final Player player, final String name)
+    {
+        Preconditions.checkNotNull(player, "player can't be null");
+        Preconditions.checkNotNull(name, "name can't be null");
 
-        Bukkit.getOnlinePlayers().forEach(online ->
+        boolean contains = PROFILES.containsKey(player.getUniqueId());
+        IsMyProfiler.instance.getLogger().info(String.format("Player %s has been %s the name to %s.", player.getName(), contains ? "update" : "changed", name));
+
+        final EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        final GameProfile gameProfile = ep.getProfile();
+
+        if (!contains)
         {
-            // ## TAKE CARE: NO REMOVE THE (ONLINE == PLAYER), IF NO THE PLAYER IS DUPLICATED
-            if (online == player || online.canSee(player))
-            {
-                final PlayerConnection playerConnection = ((CraftPlayer) online).getHandle().playerConnection;
-                playerConnection.sendPacket(prem);
-                playerConnection.sendPacket(padd);
-                playerConnection.sendPacket(pdes);
-                playerConnection.sendPacket(pnes);
-            }
-        });
+            PROFILES.put(player.getUniqueId(), gameProfile);
+        }
+
+        try
+        {
+            final Field nameField = gameProfile.getClass().getDeclaredField("name");
+
+            nameField.setAccessible(true);
+            nameField.set(gameProfile, name);
+            nameField.setAccessible(!nameField.isAccessible());
+        } catch (Exception e)
+        {
+            throw new RuntimeException("Can't be change the name from " + player.getName() + ".");
+        }
+
+        updatePlayer(ep); // ## UPDATE PLAYER
     }
 
     /**
@@ -155,18 +174,29 @@ public class ProfileManager
         gameProfile.getProperties().removeAll("textures");
         gameProfile.getProperties().put("textures", new Property("textures", value, signature));
 
+        updatePlayer(ep); // ## UPDATE PLAYER
+    }
+
+    /**
+     * Update Player,
+     * This method create a packets to send for the all players that are online to update the packets
+     *
+     * @param entityPlayer the entity player that will be update
+     */
+    private static void updatePlayer(final EntityPlayer entityPlayer)
+    {
+
         // ## MAKE THE PACKETS
         // ## (TO MAKE MORE FAST THE UPDATE)
-
-        final PacketPlayOutPlayerInfo prem = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ep);
-        final PacketPlayOutPlayerInfo padd = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ep);
-        final PacketPlayOutEntityDestroy pdes = new PacketPlayOutEntityDestroy(ep.getId());
-        final PacketPlayOutNamedEntitySpawn pnes = new PacketPlayOutNamedEntitySpawn(ep);
+        final PacketPlayOutPlayerInfo prem = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, entityPlayer);
+        final PacketPlayOutPlayerInfo padd = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, entityPlayer);
+        final PacketPlayOutEntityDestroy pdes = new PacketPlayOutEntityDestroy(entityPlayer.getId());
+        final PacketPlayOutNamedEntitySpawn pnes = new PacketPlayOutNamedEntitySpawn(entityPlayer);
 
         Bukkit.getOnlinePlayers().forEach(online ->
         {
             // ## TAKE CARE: NO REMOVE THE (ONLINE == PLAYER), IF NO THE PLAYER IS DUPLICATED
-            if (online == player || online.canSee(player))
+            if (online == entityPlayer || online.canSee(entityPlayer.getBukkitEntity()))
             {
                 final PlayerConnection playerConnection = ((CraftPlayer) online).getHandle().playerConnection;
                 playerConnection.sendPacket(prem);

@@ -23,6 +23,7 @@
  */
 package com.github.biologyiswell.profiler;
 
+import com.github.biologyiswell.profiler.command.IsMyProfilerCmd;
 import com.github.biologyiswell.profiler.listeners.PlayerListener;
 import com.google.gson.Gson;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,7 +53,11 @@ public class IsMyProfiler extends JavaPlugin
     public void onEnable()
     {
         instance = this;
+
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        getCommand("profiler").setExecutor(new IsMyProfilerCmd());
+
+        getLogger().info("IsMyProfiler enabled.");
     }
 
     /**
@@ -62,5 +67,6 @@ public class IsMyProfiler extends JavaPlugin
     @Override
     public void onDisable()
     {
+        getLogger().info("IsMyProfiler disabled.");
     }
 }

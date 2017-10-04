@@ -4,3 +4,7 @@ version: 0.1
 author: biologyiswell
 
 description: IsMyProfiler is a plugin that change the names and skins from players
+
+commands:
+  profiler:
+    description: Profiler command to manage the skin and name from player profile
